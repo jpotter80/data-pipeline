@@ -1,4 +1,7 @@
- data-pipeline  poetry run python main.py
+```sh
+poetry run python main.py
+```
+
 Database imdb already exists.
 Table imdb already exists.
 Table imdb already contains data. Skipping insertion.
