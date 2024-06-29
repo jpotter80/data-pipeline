@@ -43,3 +43,7 @@ dataset/*
 # Operating System
 .DS_Store
 Thumbs.db
+
+# Notes
+*.txt
+notes.md

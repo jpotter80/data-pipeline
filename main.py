@@ -13,7 +13,7 @@ def main():
     db_loader = DBLoader(db_name)
     llm_analyzer = LLMAnalyzer()
 
-    # Create the database
+    # Create the database (if it doesn't exist)
     db_loader.create_database()
 
     # Process all CSV files
@@ -26,16 +26,16 @@ def main():
         # Load CSV into DataFrame
         df = csv_loader.load_csv(filename)
 
-        # Create table and insert data
+        # Create table (if it doesn't exist) and insert data (if table is empty)
         table_name = os.path.splitext(filename)[0]  # Use filename without extension as table name
         db_loader.create_table(table_name, df)
         db_loader.insert_data(table_name, df)
 
-        # Analyze with LLM
+        # Analyze with LLM (consider caching these results for efficiency)
         llm_analysis = llm_analyzer.analyze_structure(analysis)
         print(f"Analysis for {filename}:\n{llm_analysis}\n")
 
-        # Generate SQL transformations
+        # Generate SQL transformations (consider caching these results for efficiency)
         sql_transformations = llm_analyzer.generate_sql_transformations(llm_analysis)
         print(f"SQL Transformations for {filename}:\n{sql_transformations}\n")
 

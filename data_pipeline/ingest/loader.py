@@ -18,7 +18,7 @@ class CSVLoader:
         csv_files = self.list_csv_files()
         if not csv_files:
             raise ValueError("No CSV files found in the dataset directory.")
-        return os.path.splitext(csv_files[0])[0]  # Use the name of the first CSV file without extension
+        return os.path.splitext(csv_files[0])[0]
 
     def load_csv(self, filename: str) -> pd.DataFrame:
         filepath = os.path.join(self.dataset_dir, filename)
@@ -54,8 +54,24 @@ class DBLoader:
             'port': os.getenv('DB_PORT', '5432')
         }
 
+    def database_exists(self) -> bool:
+        """Check if the database already exists."""
+        conn_params = self.conn_params.copy()
+        conn_params['dbname'] = 'postgres'
+        conn = psycopg2.connect(**conn_params)
+        conn.autocommit = True
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT 1 FROM pg_database WHERE datname = %s", (self.conn_params['dbname'],))
+                return cur.fetchone() is not None
+        finally:
+            conn.close()
+
     def create_database(self):
-        # Connect to 'postgres' database to create a new database
+        if self.database_exists():
+            print(f"Database {self.conn_params['dbname']} already exists.")
+            return
+
         conn_params = self.conn_params.copy()
         conn_params['dbname'] = 'postgres'
         conn = psycopg2.connect(**conn_params)
@@ -64,12 +80,27 @@ class DBLoader:
             with conn.cursor() as cur:
                 cur.execute(f"CREATE DATABASE {self.conn_params['dbname']}")
             print(f"Database {self.conn_params['dbname']} created successfully.")
-        except psycopg2.errors.DuplicateDatabase:
-            print(f"Database {self.conn_params['dbname']} already exists.")
+        finally:
+            conn.close()
+
+    def table_exists(self, table_name: str) -> bool:
+        """Check if a table already exists in the database."""
+        conn = psycopg2.connect(**self.conn_params)
+        try:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    SELECT 1 FROM information_schema.tables 
+                    WHERE table_name = %s
+                """, (table_name,))
+                return cur.fetchone() is not None
         finally:
             conn.close()
 
     def create_table(self, table_name: str, df: pd.DataFrame):
+        if self.table_exists(table_name):
+            print(f"Table {table_name} already exists.")
+            return
+
         conn = psycopg2.connect(**self.conn_params)
         try:
             with conn.cursor() as cur:
@@ -97,7 +128,21 @@ class DBLoader:
         finally:
             conn.close()
 
+    def table_is_empty(self, table_name: str) -> bool:
+        """Check if a table is empty."""
+        conn = psycopg2.connect(**self.conn_params)
+        try:
+            with conn.cursor() as cur:
+                cur.execute(f"SELECT 1 FROM {table_name} LIMIT 1")
+                return cur.fetchone() is None
+        finally:
+            conn.close()
+
     def insert_data(self, table_name: str, df: pd.DataFrame):
+        if not self.table_is_empty(table_name):
+            print(f"Table {table_name} already contains data. Skipping insertion.")
+            return
+
         conn = psycopg2.connect(**self.conn_params)
         try:
             with conn.cursor() as cur:
