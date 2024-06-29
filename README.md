@@ -1,65 +1,31 @@
 # Data Pipeline
 
-A versatile data pipeline for CSV processing and analysis using PostgreSQL, OpenAI GPT-4o, and Python. This project automates the process of ingesting CSV files, creating a database, analyzing data structure, and generating insights using AI.
+A versatile data pipeline for CSV processing, analysis, and transformation using PostgreSQL, OpenAI GPT-4, and Python.
 
-## Project Goals
+## Project Overview
 
-- Create a flexible data pipeline that can handle various CSV files
-- Automate the process of database creation, data ingestion, analysis, and transformation
-- Utilize AI (GPT-4o) for data analysis and SQL query generation
-- Provide a foundation for future enhancements such as data vectorization and visualization
+This project automates the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using AI, and generating SQL transformations for data cleaning and normalization.
 
 ## Features
 
-- Automatic database creation based on CSV filename
-- CSV file detection, loading, and table creation
+- Automatic CSV file detection and loading
+- Dynamic database and table creation based on CSV filename
 - Data insertion into PostgreSQL
-- AI-powered data analysis and SQL transformation generation
+- AI-powered data analysis using OpenAI's GPT-4
+- SQL transformation generation for data cleaning and normalization
 - Extensible architecture for future enhancements (vectorization, visualization)
 
 ## Prerequisites
 
-- Python 3.9+
+- Python 3.12+
 - PostgreSQL
 - OpenAI API key
 
-## Project Structure
-
-```
-data-pipeline/
-├── data_pipeline/
-│   ├── __init__.py
-│   ├── ingest/
-│   │   ├── __init__.py
-│   │   └── loader.py
-│   ├── analyze/
-│   │   ├── __init__.py
-│   │   └── analyzer.py
-│   ├── transform/
-│   │   ├── __init__.py
-│   │   └── transformer.py
-│   ├── vectorize/
-│   │   ├── __init__.py
-│   │   └── vectorizer.py
-│   └── visualize/
-│       ├── __init__.py
-│       └── visualizer.py
-├── dataset/
-│   └── .gitkeep
-├── tests/
-│   └── __init__.py
-├── .env
-├── .gitignore
-├── main.py
-├── pyproject.toml
-└── README.md
-```
-
-## Setup
+## Installation
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/data-pipeline.git
+   git clone https://github.com/your-username/data-pipeline.git
    cd data-pipeline
    ```
 
@@ -82,11 +48,9 @@ data-pipeline/
    OPENAI_API_KEY=your_openai_api_key
    ```
 
-5. Ensure PostgreSQL is installed and running on your system.
-
 ## Usage
 
-1. Place your CSV file in the `dataset` directory. The name of the CSV file (without extension) will be used as the database name.
+1. Place your CSV file(s) in the `dataset` directory. The name of the first CSV file (alphabetically) will be used as the database name.
 
 2. Run the main script:
    ```
@@ -94,69 +58,62 @@ data-pipeline/
    ```
 
    This will:
-   - Create a new PostgreSQL database with the same name as your CSV file (without extension)
-   - Load the CSV data into a table in this database
-   - Perform analysis and generate insights
+   - Create a new PostgreSQL database (if it doesn't exist)
+   - Create tables based on CSV files (if they don't exist)
+   - Insert data into the tables (if they're empty)
+   - Perform AI-powered analysis of the data structure
+   - Generate SQL transformations for data cleaning and normalization
 
-Note: If you place multiple CSV files in the dataset directory, the name of the first CSV file (alphabetically) will be used as the database name, and all CSV files will be loaded as separate tables in this database.
+## Project Structure
+
+```
+data-pipeline/
+├── data_pipeline/
+│   ├── ingest/
+│   │   ├── loader.py
+│   ├── analyze/
+│   │   ├── analyzer.py
+│   ├── transform/
+│   │   ├── transformer.py (TODO)
+│   ├── vectorize/
+│   │   ├── vectorizer.py (TODO)
+│   └── visualize/
+│       ├── visualizer.py (TODO)
+├── dataset/
+│   └── .gitkeep
+├── tests/
+│   └── __init__.py (TODO: Add unit tests)
+├── .env
+├── .gitignore
+├── main.py
+├── pyproject.toml
+└── README.md
+```
 
 ## Components
 
 ### Ingest
 
-The `ingest` module (`data_pipeline/ingest/loader.py`) contains two main classes:
-
-- `CSVLoader`: Handles loading and analyzing CSV files from the `dataset` directory.
-- `DBLoader`: Manages database operations, including database creation, table creation, and data insertion.
+The `ingest` module (`data_pipeline/ingest/loader.py`) handles CSV loading and database operations.
 
 ### Analyze
 
-The `analyze` module (`data_pipeline/analyze/analyzer.py`) contains the `LLMAnalyzer` class, which uses OpenAI's GPT-4o to:
-
-- Analyze the structure of CSV files
-- Generate SQL transformations based on the analysis
+The `analyze` module (`data_pipeline/analyze/analyzer.py`) uses OpenAI's GPT-4 to analyze data structure and generate SQL transformations.
 
 ### Transform, Vectorize, and Visualize
 
-These modules are placeholders for future enhancements:
-
-- `transform`: Will implement SQL transformations generated by the analyzer.
-- `vectorize`: Will handle data vectorization for advanced analytics.
-- `visualize`: Will create visualizations of the processed data and insights.
-
-## Development
-
-To contribute to this project:
-
-1. Fork the repository
-2. Create a new branch (`git checkout -b feature/your-feature`)
-3. Make your changes
-4. Run tests (`poetry run pytest`)
-5. Commit your changes (`git commit -am 'Add some feature'`)
-6. Push to the branch (`git push origin feature/your-feature`)
-7. Create a new Pull Request
-
-To add new development dependencies, use:
-```
-poetry add --group dev <package-name>
-```
-
-## Testing
-
-Currently, the `tests/` directory is empty. As you develop the project, add unit tests for each module to ensure functionality and make future modifications easier.
+These modules are placeholders for future enhancements.
 
 ## Future Enhancements
 
-- Implement SQL transformation execution in the `transform` module
-- Add data vectorization using pgai in the `vectorize` module
-- Develop insight generation and visualization components in the `visualize` module
-- Add comprehensive error handling and logging throughout the pipeline
+- Implement SQL transformation execution
+- Add data vectorization for advanced analytics
+- Develop insight generation and visualization components
+- Implement caching for LLM analyses and SQL transformations
+- Add comprehensive error handling and logging
 - Expand test coverage with unit and integration tests
 - Implement parallel processing for handling large datasets
-- Add support for different database backends
 - Create a web interface for monitoring and controlling the pipeline
-- Enhance multi-file handling to allow users to specify a common database name
-- Implement error handling for invalid database names (e.g., CSV files with spaces or special characters)
 
 ## Contributing
 
