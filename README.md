@@ -25,7 +25,7 @@ This project automates the process of ingesting CSV files, creating a PostgreSQL
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/data-pipeline.git
+   git clone https://github.com/jpotter80/data-pipeline.git
    cd data-pipeline
    ```
 
