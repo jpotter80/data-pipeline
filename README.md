@@ -4,14 +4,14 @@ A versatile data pipeline for CSV processing, analysis, and transformation using
 
 ## Project Overview
 
-This project automates the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using AI, and generating SQL transformations for data cleaning and normalization.
+This project automates the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using llm's, and generating SQL transformations for data cleaning and normalization.
 
 ## Features
 
 - Automatic CSV file detection and loading
 - Dynamic database and table creation based on CSV filename
 - Data insertion into PostgreSQL
-- AI-powered data analysis using OpenAI's GPT-4
+- LLM-powered data analysis using OpenAI's GPT-4
 - SQL transformation generation for data cleaning and normalization
 - Extensible architecture for future enhancements (vectorization, visualization)
 
