@@ -1,0 +1,30 @@
+<svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="250" cy="250" r="240" fill="#f0f0f0" stroke="#000" stroke-width="2"/>
+  <circle cx="250" cy="250" r="180" fill="#fff" stroke="#000" stroke-width="2"/>
+  
+  <path d="M250,70 A180,180 0 0,1 423,250" fill="#e6f3ff" stroke="#000"/>
+  <text x="360" y="140" transform="rotate(45 360 140)">Data Ingestion</text>
+  
+  <path d="M423,250 A180,180 0 0,1 250,430" fill="#ffebcc" stroke="#000"/>
+  <text x="360" y="360" transform="rotate(135 360 360)">Data Profiling</text>
+  
+  <path d="M250,430 A180,180 0 0,1 77,250" fill="#e6ffe6" stroke="#000"/>
+  <text x="140" y="360" transform="rotate(225 140 360)">Data Cleaning</text>
+  
+  <path d="M77,250 A180,180 0 0,1 250,70" fill="#ffe6e6" stroke="#000"/>
+  <text x="140" y="140" transform="rotate(315 140 140)">Database Ops</text>
+  
+  <circle cx="250" cy="250" r="120" fill="#fff" stroke="#000" stroke-width="2"/>
+  
+  <path d="M250,130 A120,120 0 0,1 354,200" fill="#ccf2ff" stroke="#000"/>
+  <text x="320" y="180" font-size="14">AI Analysis</text>
+  
+  <path d="M354,200 A120,120 0 0,1 354,300" fill="#ffe6cc" stroke="#000"/>
+  <text x="380" y="250" font-size="14">Visualization</text>
+  
+  <path d="M354,300 A120,120 0 0,1 250,370" fill="#e6ffcc" stroke="#000"/>
+  <text x="320" y="340" font-size="14">Jupyter Integration</text>
+  
+  <circle cx="250" cy="250" r="60" fill="#f0f0f0" stroke="#000" stroke-width="2"/>
+  <text x="250" y="255" text-anchor="middle" font-size="14">Data Pipeline</text>
+</svg>
