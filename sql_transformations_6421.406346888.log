@@ -1,0 +1,92 @@
+User Message:
+Based on the following data analysis, generate SQL transformations to address the identified issues and implement the suggested improvements:
+
+        None
+
+        Please provide:
+        1. SQL statements for data cleaning
+        2. SQL statements for data normalization
+        3. Any additional SQL transformations that would improve data quality
+
+AI Response:
+I apologize, but there is no specific data analysis provided in your request. Without details about the data, identified issues, or suggested improvements, I cannot generate accurate SQL transformations.
+
+To provide meaningful SQL transformations, I would need information such as:
+
+1. The structure of the database (tables, columns, relationships)
+2. Specific data quality issues identified
+3. The desired outcome or improvements
+4. Any business rules or constraints to consider
+
+If you can provide this information, I'd be happy to help you create appropriate SQL transformations for data cleaning, normalization, and quality improvement.
+
+In the absence of specific details, I can offer some general SQL transformation examples that are commonly used for data cleaning and quality improvement:
+
+1. SQL statements for data cleaning:
+
+```sql
+-- Remove leading and trailing spaces
+UPDATE table_name
+SET column_name = TRIM(column_name);
+
+-- Convert to uppercase
+UPDATE table_name
+SET column_name = UPPER(column_name);
+
+-- Replace NULL values with a default value
+UPDATE table_name
+SET column_name = COALESCE(column_name, 'Default Value')
+WHERE column_name IS NULL;
+
+-- Remove duplicate rows
+DELETE FROM table_name
+WHERE id NOT IN (
+    SELECT MIN(id)
+    FROM table_name
+    GROUP BY column1, column2, column3
+);
+```
+
+2. SQL statements for data normalization:
+
+```sql
+-- Create a new table for normalized data
+CREATE TABLE normalized_table (
+    id INT PRIMARY KEY,
+    attribute1 VARCHAR(50),
+    attribute2 VARCHAR(50)
+);
+
+-- Insert normalized data
+INSERT INTO normalized_table (id, attribute1, attribute2)
+SELECT DISTINCT id, attribute1, attribute2
+FROM original_table;
+
+-- Update foreign key references
+ALTER TABLE dependent_table
+ADD CONSTRAINT fk_normalized
+FOREIGN KEY (normalized_id) REFERENCES normalized_table(id);
+```
+
+3. Additional SQL transformations for data quality:
+
+```sql
+-- Enforce data type constraints
+ALTER TABLE table_name
+ALTER COLUMN column_name TYPE appropriate_data_type;
+
+-- Add check constraints
+ALTER TABLE table_name
+ADD CONSTRAINT check_constraint_name CHECK (column_name condition);
+
+-- Create indexes for frequently queried columns
+CREATE INDEX index_name ON table_name (column_name);
+
+-- Set up triggers for data validation
+CREATE TRIGGER trigger_name
+BEFORE INSERT OR UPDATE ON table_name
+FOR EACH ROW
+EXECUTE FUNCTION validation_function();
+```
+
+These are general examples and would need to be adapted to your specific database structure and requirements. If you can provide more details about your data and the specific issues you're facing, I can offer more tailored SQL transformations.
