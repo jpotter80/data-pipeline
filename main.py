@@ -43,7 +43,9 @@ async def process_csv(
         cleaned_df = await cleaner.clean_data(df, profile)
         sql_data_types = cleaner.get_sql_data_types(profile)
 
-        table_name = Path(filename).stem.lower()
+        table_name = csv_loader.get_valid_table_name(filename)
+        logger.info(f"Creating table {table_name} in database {db_name}")
+
         await db_loader.create_table(db_name, table_name, cleaned_df, sql_data_types)
         await db_loader.insert_data(db_name, table_name, cleaned_df, sql_data_types)
 
@@ -67,6 +69,8 @@ async def process_csv(
 async def main():
     try:
         config = Config()
+        config.validate()  # Validate configuration
+        
         csv_loader = CSVLoader(config.data_dir)
         db_loader = DBLoader(config.db_config)
         llm_analyzer = LLMAnalyzer(config.anthropic_api_key)
