@@ -1,27 +1,43 @@
-# Data Pipeline
-
-A versatile data pipeline for CSV processing, analysis, and transformation using PostgreSQL, OpenAI GPT-4, and Python.
+# Data Pipeline Project
 
 ## Project Overview
 
-This project automates the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using llm's, and generating SQL transformations for data cleaning and normalization.
+This project is a comprehensive data pipeline designed to automate the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using AI, and generating insights. It streamlines the data analysis workflow, allowing analysts to quickly move from data gathering to actionable insights.
+
 
 ## Features
 
 - Automatic CSV file detection and loading
-- Dynamic database and table creation based on CSV filename
-- Data insertion into PostgreSQL
-- LLM-powered data analysis using OpenAI's GPT-4
+- Dynamic database creation and table management
+- AI-powered data analysis using LLM integration (via Anthropic API)
 - SQL transformation generation for data cleaning and normalization
-- Extensible architecture for future enhancements (vectorization, visualization)
+- Data visualization capabilities
+- Comprehensive logging and output management
+- Asynchronous execution for improved performance
 
-## Prerequisites
+## Project Structure
 
-- Python 3.12+
-- PostgreSQL
-- OpenAI API key
+```
+data-pipeline/
+├── data_pipeline/
+│   ├── analyze/
+│   ├── ingest/
+│   ├── cleaning/
+│   ├── profiling/
+│   ├── visualize/
+│   └── config.py
+├── dataset/
+├── notebooks/
+├── tests/
+├── .env
+├── .gitignore
+├── main.py
+├── README.md
+├── poetry.lock
+└── pyproject.toml
+```
 
-## Installation
+## Setup and Installation
 
 1. Clone the repository:
    ```
@@ -29,91 +45,45 @@ This project automates the process of ingesting CSV files, creating a PostgreSQL
    cd data-pipeline
    ```
 
-2. Install Poetry:
-   ```
-   curl -sSL https://install.python-poetry.org | python3 -
-   ```
-
-3. Install dependencies:
+2. Install dependencies using Poetry:
    ```
    poetry install
    ```
 
-4. Create a `.env` file in the project root and add your environment variables:
+3. Set up environment variables in a `.env` file:
    ```
    DB_USER=your_postgres_username
    DB_PASS=your_postgres_password
    DB_HOST=localhost
    DB_PORT=5432
-   OPENAI_API_KEY=your_openai_api_key
+   ANTHROPIC_API_KEY=your_anthropic_api_key
    ```
+
+4. Place your CSV files in the `dataset` directory.
 
 ## Usage
 
-1. Place your CSV file(s) in the `dataset` directory. The name of the first CSV file (alphabetically) will be used as the database name.
-
-2. Run the main script:
-   ```
-   poetry run python main.py
-   ```
-
-   This will:
-   - Create a new PostgreSQL database (if it doesn't exist)
-   - Create tables based on CSV files (if they don't exist)
-   - Insert data into the tables (if they're empty)
-   - Perform AI-powered analysis of the data structure
-   - Generate SQL transformations for data cleaning and normalization
-
-## Project Structure
+To run the entire pipeline:
 
 ```
-data-pipeline/
-├── data_pipeline/
-│   ├── ingest/
-│   │   ├── loader.py
-│   ├── analyze/
-│   │   ├── analyzer.py
-│   ├── transform/
-│   │   ├── transformer.py (TODO)
-│   ├── vectorize/
-│   │   ├── vectorizer.py (TODO)
-│   └── visualize/
-│       ├── visualizer.py (TODO)
-├── dataset/
-│   └── .gitkeep
-├── tests/
-│   └── __init__.py (TODO: Add unit tests)
-├── .env
-├── .gitignore
-├── main.py
-├── pyproject.toml
-└── README.md
+poetry run python main.py
 ```
 
-## Components
+This will execute all steps of the pipeline, from data ingestion to insight generation.
 
-### Ingest
+## Current Development Focus
 
-The `ingest` module (`data_pipeline/ingest/loader.py`) handles CSV loading and database operations.
+- Implementing SQL transformations for data cleaning and normalization
+- Enhancing data visualization capabilities
+- Developing a Jupyter notebook for step-by-step pipeline demonstration
+- Implementing comprehensive error handling and recovery mechanisms
+- Optimizing pipeline performance for larger datasets
 
-### Analyze
+## Planned Features
 
-The `analyze` module (`data_pipeline/analyze/analyzer.py`) uses OpenAI's GPT-4 to analyze data structure and generate SQL transformations.
-
-### Transform, Vectorize, and Visualize
-
-These modules are placeholders for future enhancements.
-
-## Future Enhancements
-
-- Implement SQL transformation execution
-- Add data vectorization for advanced analytics
-- Develop insight generation and visualization components
-- Implement caching for LLM analyses and SQL transformations
-- Add comprehensive error handling and logging
-- Expand test coverage with unit and integration tests
-- Implement parallel processing for handling large datasets
-- Create a web interface for monitoring and controlling the pipeline
+- Advanced data visualization and reporting
+- Integration with pgvector for enhanced data analysis
+- User interface for project and data parameter selection
 
 ## Contributing
 

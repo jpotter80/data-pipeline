@@ -1,48 +1,109 @@
-import os
-from dotenv import load_dotenv
+"""
+Main module for the data pipeline project.
+"""
+
+import asyncio
+import logging
+from pathlib import Path
+from typing import List, Tuple, Optional
+
+from data_pipeline.config import Config
+from data_pipeline.profiling.profiler import DataProfiler
+from data_pipeline.cleaning.cleaner import DataCleaner
 from data_pipeline.ingest.loader import CSVLoader, DBLoader
 from data_pipeline.analyze.analyzer import LLMAnalyzer
+from data_pipeline.visualize.visualizer import Visualizer
 
-# Load environment variables
-load_dotenv()
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-def main():
-    # Initialize components
-    csv_loader = CSVLoader()
-    db_name = csv_loader.get_database_name()
-    db_loader = DBLoader(db_name)
-    llm_analyzer = LLMAnalyzer()
+async def process_csv(
+    csv_loader: CSVLoader,
+    db_loader: DBLoader,
+    llm_analyzer: LLMAnalyzer,
+    visualizer: Visualizer,
+    profiler: DataProfiler,
+    cleaner: DataCleaner,
+    db_name: str,
+    filename: str
+) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    try:
+        file_path = Path(csv_loader.data_dir) / filename
+        logger.info(f"Processing file: {file_path}")
 
-    # Create the database (if it doesn't exist)
-    db_loader.create_database()
+        profile = await profiler.profile_csv(str(file_path))
+        report = profiler.generate_report(profile)
+        logger.info(f"Profiling report for {filename}:\n{report}")
 
-    # Process all CSV files
-    csv_analyses = csv_loader.process_all_csv()
+        df = await csv_loader.load_csv(filename)
+        if df is None:
+            logger.error(f"Failed to load {filename}")
+            return None, None, None
 
-    for csv_analysis in csv_analyses:
-        filename = csv_analysis['filename']
-        analysis = csv_analysis['analysis']
+        cleaned_df = await cleaner.clean_data(df, profile)
+        sql_data_types = cleaner.get_sql_data_types(profile)
 
-        # Load CSV into DataFrame
-        df = csv_loader.load_csv(filename)
+        table_name = csv_loader.get_valid_table_name(filename)
+        logger.info(f"Creating table {table_name} in database {db_name}")
 
-        # Create table (if it doesn't exist) and insert data (if table is empty)
-        table_name = os.path.splitext(filename)[0]  # Use filename without extension as table name
-        db_loader.create_table(table_name, df)
-        db_loader.insert_data(table_name, df)
+        await db_loader.create_table(db_name, table_name, cleaned_df, sql_data_types)
+        await db_loader.insert_data(db_name, table_name, cleaned_df, sql_data_types)
 
-        # Analyze with LLM (consider caching these results for efficiency)
-        llm_analysis = llm_analyzer.analyze_structure(analysis)
-        print(f"Analysis for {filename}:\n{llm_analysis}\n")
+        llm_analysis, analysis_log = await llm_analyzer.analyze_structure(profile)
+        logger.info(f"Analysis for {filename}:\n{llm_analysis}")
+        logger.info(f"Analysis log saved to: {analysis_log}")
 
-        # Generate SQL transformations (consider caching these results for efficiency)
-        sql_transformations = llm_analyzer.generate_sql_transformations(llm_analysis)
-        print(f"SQL Transformations for {filename}:\n{sql_transformations}\n")
+        sql_transformations, sql_log = await llm_analyzer.generate_sql_transformations(llm_analysis)
+        logger.info(f"SQL Transformations for {filename}:\n{sql_transformations}")
+        logger.info(f"SQL transformations log saved to: {sql_log}")
 
-        # TODO: Execute SQL transformations
-        # TODO: Vectorize data
-        # TODO: Generate insights
-        # TODO: Visualize results
+        vis_filename = await visualizer.create_visualizations(cleaned_df, table_name)
+        logger.info(f"Visualizations saved to: {vis_filename}")
+
+        return table_name, llm_analysis, sql_transformations
+
+    except Exception as e:
+        logger.exception(f"Error processing {filename}: {str(e)}")
+        return None, None, None
+
+async def main():
+    try:
+        config = Config()
+        config.validate()  # Validate configuration
+        
+        csv_loader = CSVLoader(config.data_dir)
+        db_loader = DBLoader(config.db_config)
+        llm_analyzer = LLMAnalyzer(config.anthropic_api_key)
+        visualizer = Visualizer(config.output_dir)
+        profiler = DataProfiler()
+        cleaner = DataCleaner()
+
+        csv_files = csv_loader.get_csv_files()
+        if not csv_files:
+            logger.error("No CSV files found in the dataset directory.")
+            return
+
+        db_name = await db_loader.get_or_create_database(csv_files)
+        if not db_name:
+            logger.error("Failed to create or get a database.")
+            return
+
+        logger.info(f"Using database: {db_name}")
+
+        tasks = [
+            process_csv(csv_loader, db_loader, llm_analyzer, visualizer, profiler, cleaner, db_name, filename)
+            for filename in csv_files
+        ]
+        results = await asyncio.gather(*tasks)
+
+        for table_name, _, _ in results:
+            if table_name:
+                logger.info(f"Processed table: {table_name}")
+            else:
+                logger.warning("Failed to process a CSV file")
+
+    except Exception as e:
+        logger.exception(f"An error occurred in the main function: {str(e)}")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

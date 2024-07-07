@@ -1,0 +1,194 @@
+User Message:
+Based on the following data analysis, generate SQL transformations to address the identified issues and implement the suggested improvements:
+
+        Thank you for providing this detailed information about the CSV structure. I'll provide a summary, highlight potential data quality issues, and offer suggestions for data cleaning and normalization.
+
+1. Summary of the data:
+
+This dataset appears to be a voter registration database, likely for a county or region in North Carolina. It contains 168,660 records with 30 columns, including personal information, address details, and various jurisdiction codes. The data includes:
+
+- Voter identification (OBJECTID, VoterRegistrationNumber)
+- Personal information (Name, Status, Party affiliation, Race, Gender, Age)
+- Address information (Residential and Mailing)
+- Various jurisdiction codes (Precinct, Municipality, Congressional District, etc.)
+- Contact information (Telephone number)
+
+2. Potential data quality issues:
+
+a. Missing data:
+- NameMiddle: 9,348 null values (5.5% of records)
+- NameSuffix: 162,138 null values (96.1% of records)
+- ResidentialAddressUnit: 143,147 null values (84.9% of records)
+- JurisdictionMunicipalityCode: 92,880 null values (55.1% of records)
+- TelephoneFullNumber: 30,152 null values (17.9% of records)
+- JurisdictionWaterDistrictCode: 165,047 null values (97.9% of records)
+
+b. Inconsistent data types:
+- Some numerical fields are stored as floats (e.g., ResidentialAddressZipCode, JurisdictionPrecinctCode) when they should be integers.
+- RegistrationDate is stored as an object (string) instead of a date type.
+
+c. Potential data accuracy issues:
+- AgeAtYearEnd might not be current and could require updating.
+- Address information might be outdated or incorrect for some voters.
+
+d. Redundant information:
+- NameLastFirstMiddle contains information already present in separate fields.
+- MailingAddressLine1 often duplicates residential address information.
+
+3. Suggestions for data cleaning and normalization:
+
+a. Handle missing data:
+- Investigate the reason for missing data in critical fields like JurisdictionMunicipalityCode.
+- Consider if null values in fields like NameMiddle, NameSuffix, and ResidentialAddressUnit are truly missing or just not applicable.
+
+b. Correct data types:
+- Convert ResidentialAddressZipCode and jurisdiction codes to integer type.
+- Change RegistrationDate to a proper date type.
+- Ensure TelephoneFullNumber is stored as a string to preserve leading zeros.
+
+c. Normalize address data:
+- Split ResidentialAddressCityStateZip into separate fields for City, State, and ZIP.
+- Consider creating a separate table for addresses to avoid duplication between residential and mailing addresses.
+
+d. Improve data consistency:
+- Standardize codes used in StatusCode, PartyCode, RaceCode, and GenderCode.
+- Ensure consistent formatting for names (e.g., capitalization).
+
+e. Remove or explain redundant data:
+- Consider removing NameLastFirstMiddle if it's not required for legacy reasons.
+- If keeping both residential and mailing addresses, add a flag to indicate when they differ.
+
+f. Add data validation:
+- Implement checks for valid age ranges, ZIP codes, and phone numbers.
+- Ensure all jurisdiction codes correspond to valid districts.
+
+g. Update time-sensitive data:
+- Implement a system to regularly update or recalculate AgeAtYearEnd.
+
+h. Consider data privacy:
+- Evaluate if all personal information is necessary and compliant with relevant privacy laws.
+
+i. Create a data dictionary:
+- Document the meaning of all codes used (e.g., StatusCode, PartyCode) for clarity.
+
+By addressing these issues, you can significantly improve the quality and usability of this voter registration dataset. Regular maintenance and updates will be crucial to keeping the information accurate and valuable.
+
+        Please provide:
+        1. SQL statements for data cleaning
+        2. SQL statements for data normalization
+        3. Any additional SQL transformations that would improve data quality
+
+AI Response:
+Certainly! I'll provide SQL statements for data cleaning, normalization, and additional transformations to improve data quality based on the analysis. We'll assume the table is named `voter_registration`.
+
+1. SQL statements for data cleaning:
+
+```sql
+-- Convert data types
+ALTER TABLE voter_registration
+ALTER COLUMN ResidentialAddressZipCode INTEGER,
+ALTER COLUMN JurisdictionPrecinctCode INTEGER,
+ALTER COLUMN RegistrationDate DATE;
+
+-- Handle missing data
+UPDATE voter_registration
+SET NameMiddle = 'N/A' WHERE NameMiddle IS NULL;
+
+UPDATE voter_registration
+SET NameSuffix = 'N/A' WHERE NameSuffix IS NULL;
+
+UPDATE voter_registration
+SET ResidentialAddressUnit = 'N/A' WHERE ResidentialAddressUnit IS NULL;
+
+-- Standardize formatting
+UPDATE voter_registration
+SET NameLast = UPPER(NameLast),
+    NameFirst = UPPER(NameFirst),
+    NameMiddle = UPPER(NameMiddle);
+
+-- Remove leading/trailing spaces
+UPDATE voter_registration
+SET NameLast = TRIM(NameLast),
+    NameFirst = TRIM(NameFirst),
+    NameMiddle = TRIM(NameMiddle),
+    ResidentialAddressStreet = TRIM(ResidentialAddressStreet);
+
+-- Update AgeAtYearEnd
+UPDATE voter_registration
+SET AgeAtYearEnd = DATEDIFF(YEAR, BirthDate, GETDATE());
+
+-- Validate phone numbers (assuming 10-digit format)
+UPDATE voter_registration
+SET TelephoneFullNumber = NULL
+WHERE TelephoneFullNumber IS NOT NULL AND LEN(TelephoneFullNumber) != 10;
+```
+
+2. SQL statements for data normalization:
+
+```sql
+-- Create a new table for addresses
+CREATE TABLE addresses (
+    AddressID INT PRIMARY KEY IDENTITY(1,1),
+    Street VARCHAR(255),
+    Unit VARCHAR(50),
+    City VARCHAR(100),
+    State CHAR(2),
+    ZipCode INTEGER
+);
+
+-- Split ResidentialAddressCityStateZip and insert into addresses table
+INSERT INTO addresses (Street, Unit, City, State, ZipCode)
+SELECT DISTINCT
+    ResidentialAddressStreet,
+    ResidentialAddressUnit,
+    SUBSTRING(ResidentialAddressCityStateZip, 1, CHARINDEX(',', ResidentialAddressCityStateZip) - 1) AS City,
+    SUBSTRING(ResidentialAddressCityStateZip, CHARINDEX(',', ResidentialAddressCityStateZip) + 2, 2) AS State,
+    ResidentialAddressZipCode
+FROM voter_registration;
+
+-- Add ResidentialAddressID to voter_registration table
+ALTER TABLE voter_registration
+ADD ResidentialAddressID INT;
+
+-- Update ResidentialAddressID in voter_registration
+UPDATE v
+SET v.ResidentialAddressID = a.AddressID
+FROM voter_registration v
+JOIN addresses a ON v.ResidentialAddressStreet = a.Street
+                AND v.ResidentialAddressUnit = a.Unit
+                AND v.ResidentialAddressZipCode = a.ZipCode;
+
+-- Create a new table for parties
+CREATE TABLE parties (
+    PartyCode CHAR(3) PRIMARY KEY,
+    PartyName VARCHAR(50)
+);
+
+-- Insert distinct parties
+INSERT INTO parties (PartyCode, PartyName)
+SELECT DISTINCT PartyCode, Party
+FROM voter_registration;
+
+-- Create a new table for race
+CREATE TABLE races (
+    RaceCode CHAR(3) PRIMARY KEY,
+    RaceName VARCHAR(50)
+);
+
+-- Insert distinct races
+INSERT INTO races (RaceCode, RaceName)
+SELECT DISTINCT RaceCode, Race
+FROM voter_registration;
+```
+
+3. Additional SQL transformations to improve data quality:
+
+```sql
+-- Create a flag for differing mailing address
+ALTER TABLE voter_registration
+ADD HasDifferentMailingAddress BIT;
+
+UPDATE voter_registration
+SET HasDifferentMailingAddress = CASE 
+    WHEN MailingAddressLine1 != ResidentialAddressStreet 
+         OR MailingAddressCityStateZip != ResidentialAddressCityStateZip
