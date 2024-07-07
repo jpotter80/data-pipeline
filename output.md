@@ -4,7 +4,6 @@
 2024-07-06 20:43:00,275 - INFO - Processing file: dataset/mlb_bat_tracking.csv
 2024-07-06 20:43:00,285 - INFO - Profiling report for mlb_bat_tracking.csv:
 Data Profiling Report
-=====================
 
 Column: id
   Inferred Type: int64

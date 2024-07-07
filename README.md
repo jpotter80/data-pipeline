@@ -4,6 +4,7 @@
 
 This project is a comprehensive data pipeline designed to automate the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using AI, and generating insights. It streamlines the data analysis workflow, allowing analysts to quickly move from data gathering to actionable insights.
 
+
 ## Features
 
 - Automatic CSV file detection and loading
@@ -40,7 +41,7 @@ data-pipeline/
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/data-pipeline.git
+   git clone https://github.com/jpotter80/data-pipeline.git
    cd data-pipeline
    ```
 
