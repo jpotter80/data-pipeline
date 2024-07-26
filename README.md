@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This project is a comprehensive data pipeline designed to automate the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using AI, and generating insights. It streamlines the data analysis workflow, allowing analysts to quickly move from data gathering to actionable insights.
+This project is a comprehensive data pipeline designed to automate the process of ingesting CSV files, creating a PostgreSQL database, analyzing data structure using Generative AI, and generating insights. It streamlines the data analysis workflow, allowing analysts to quickly move from data gathering to actionable insights.
 
 
 ## Features
